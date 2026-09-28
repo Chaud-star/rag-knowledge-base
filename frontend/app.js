@@ -6,6 +6,9 @@ const documentList = document.getElementById("documentList");
 const questionInput = document.getElementById("questionInput");
 const askBtn = document.getElementById("askBtn");
 const answerBox = document.getElementById("answerBox");
+const wikiQuestionInput = document.getElementById("wikiQuestionInput");
+const wikiAskBtn = document.getElementById("wikiAskBtn");
+const wikiAnswerBox = document.getElementById("wikiAnswerBox");
 
 async function loadDocuments() {
     const response = await fetch("/api/documents");
@@ -85,9 +88,37 @@ async function askQuestion() {
 
     answerBox.textContent = text;
 }
+async function askWikiQuestion() {
+    const question = wikiQuestionInput.value.trim();
+    if (!question) {
+        wikiAnswerBox.textContent = "请输入问题";
+        return;
+    }
 
+    wikiAnswerBox.textContent = "正在搜索维基百科并生成答案...";
+
+    const response = await fetch("/api/chat_wiki", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+        wikiAnswerBox.textContent = result.detail || "请求失败";
+        return;
+    }
+
+    let text = `回答：\n${result.answer}\n\n来源：\n`;
+    result.sources.forEach((source) => {
+        text += `- ${source.title}\n  ${source.url}\n  ${source.text.slice(0, 150)}\n`;
+    });
+
+    wikiAnswerBox.textContent = text;
+}
 uploadBtn.addEventListener("click", uploadDocument);
 refreshBtn.addEventListener("click", loadDocuments);
 askBtn.addEventListener("click", askQuestion);
+wikiAskBtn.addEventListener("click", askWikiQuestion);
 
 loadDocuments();

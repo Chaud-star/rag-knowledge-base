@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.api import chat, documents
+from app.api import chat, documents,wiki
 
 
 app = FastAPI(
@@ -11,6 +11,7 @@ app = FastAPI(
 
 app.include_router(documents.router)
 app.include_router(chat.router)
+app.include_router(wiki.router)
 
 
 @app.get("/health")
